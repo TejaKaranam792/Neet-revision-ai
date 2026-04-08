@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import BottomNav from '@/components/BottomNav';
 import TopicSelector from '@/components/TopicSelector';
+import { getPhysicsStaticContent } from '@/lib/physics-static';
 
 type Mode = 'explain' | 'solver' | 'pyq' | 'mistake' | 'rapid';
 
@@ -82,16 +83,24 @@ export default function PhysicsHelperPage() {
     setResult('');
     
     try {
-      const res = await fetch('/api/physics-helper', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: activeMode.id, input: inputVal })
-      });
+      const staticResult = getPhysicsStaticContent(activeMode.id, inputVal);
       
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to generate');
-      
-      setResult(data.result);
+      if (staticResult) {
+        // Add a small artificial delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setResult(staticResult);
+      } else {
+        const res = await fetch('/api/physics-helper', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: activeMode.id, input: inputVal })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to generate');
+        
+        setResult(data.result);
+      }
     } catch (err: any) {
       setResult(`Error: ${err.message}`);
     } finally {
