@@ -21,7 +21,7 @@ interface ModeConfig {
 const MODES: ModeConfig[] = [
   {
     id: 'explain',
-    title: 'Explain Simply',
+    title: 'Simple Mode (Weak Student)',
     icon: '🧩',
     desc: 'Bite-sized concept explanations with analogies',
     color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -41,7 +41,7 @@ const MODES: ModeConfig[] = [
   },
   {
     id: 'pyq',
-    title: 'PYQ Pattern',
+    title: 'PYQ Pattern Mode',
     icon: '🎯',
     desc: 'See the most repeated models for a topic + shortcuts',
     color: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -61,7 +61,7 @@ const MODES: ModeConfig[] = [
   },
   {
     id: 'rapid',
-    title: 'Rapid Revision',
+    title: '15-Min Revision',
     icon: '⏱️',
     desc: 'Quick formula sheet + 3 traps + 5 rapid MCQs',
     color: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -70,6 +70,58 @@ const MODES: ModeConfig[] = [
     example: 'Modern Physics'
   }
 ];
+
+const StructuredResult = ({ text, copyToClipboard }: { text: string; copyToClipboard: () => void }) => {
+  // Split sections by emojis followed by titles
+  const sections = text.split(/(?=🚀|🧩|🔢|⚡|❌|📝|🔍|🎯|💡|🛠️|⚠️|⏱️)/g).filter(Boolean);
+
+  return (
+    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden animate-slide-up">
+      <div className="bg-gray-900 px-5 py-3 flex justify-between items-center">
+        <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          Coach Protocol Active
+        </span>
+        <button 
+          onClick={copyToClipboard}
+          className="text-[10px] font-bold bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full hover:bg-white/20 transition-colors"
+        >
+          Copy
+        </button>
+      </div>
+      <div className="p-4 sm:p-6 space-y-4">
+        {sections.map((section, idx) => {
+          const lines = section.trim().split('\n');
+          const header = lines[0];
+          const content = lines.slice(1).join('\n');
+
+          // Determine section colors based on icons
+          let headerColor = "text-gray-900";
+          let bgColor = "bg-gray-50/50";
+          let borderColor = "border-gray-100";
+
+          if (header.includes('🚀')) { headerColor = "text-blue-600"; bgColor = "bg-blue-50/50"; borderColor = "border-blue-100"; }
+          if (header.includes('⚡') || header.includes('🎯')) { headerColor = "text-amber-600"; bgColor = "bg-amber-50/50"; borderColor = "border-amber-100"; }
+          if (header.includes('❌') || header.includes('⚠️')) { headerColor = "text-rose-600"; bgColor = "bg-rose-50/50"; borderColor = "border-rose-100"; }
+          if (header.includes('🧩')) { headerColor = "text-purple-600"; bgColor = "bg-purple-50/50"; borderColor = "border-purple-100"; }
+          if (header.includes('🔢') || header.includes('🛠️')) { headerColor = "text-emerald-600"; bgColor = "bg-emerald-50/50"; borderColor = "border-emerald-100"; }
+          if (header.includes('⏱️')) { headerColor = "text-amber-700"; bgColor = "bg-amber-50/50"; borderColor = "border-amber-100"; }
+
+          return (
+            <div key={idx} className={`${bgColor} border ${borderColor} rounded-2xl p-4 transition-all hover:shadow-sm`}>
+              <h3 className={`text-sm font-black mb-1.5 flex items-center gap-2 ${headerColor}`}>
+                {header}
+              </h3>
+              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
+                {content}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 export default function PhysicsHelperPage() {
   const [activeMode, setActiveMode] = useState<ModeConfig | null>(null);
@@ -119,41 +171,48 @@ export default function PhysicsHelperPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => { setActiveMode(null); setResult(''); setInputVal(''); }}
-              className="text-gray-500 font-medium text-sm"
+              className="text-gray-500 font-medium text-sm border border-gray-200 px-3 py-1 rounded-full active:scale-95 hover:bg-gray-50 transition-colors"
             >
               ← Back
             </button>
             <h1 className="text-lg font-bold text-gray-900">{activeMode.icon} {activeMode.title}</h1>
           </div>
         ) : (
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">🧲 Physics Helper</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Weak in math? Let\'s make physics intuitive.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-black text-gray-900 tracking-tight">🧲 Physics AI Mentor</h1>
+              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">Weak Student Mode Active</p>
+            </div>
+            <div className="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full border border-blue-200">
+              PRO
+            </div>
           </div>
         )}
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
         {!activeMode ? (
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-4">
             {MODES.map(mod => (
               <button
                 key={mod.id}
                 onClick={() => setActiveMode(mod)}
-                className={`text-left p-4 rounded-2xl border transition-transform active:scale-[0.98] ${mod.color} bg-opacity-40 hover:bg-opacity-60`}
+                className={`text-left p-5 rounded-[2rem] border transition-all active:scale-[0.98] ${mod.color} bg-opacity-40 hover:bg-opacity-80 shadow-sm flex items-start gap-4`}
               >
-                <div className="text-2xl mb-2">{mod.icon}</div>
-                <h2 className="font-bold text-base mb-1">{mod.title}</h2>
-                <p className="text-xs opacity-90">{mod.desc}</p>
+                <div className="text-3xl bg-white/60 p-3 rounded-2xl shadow-sm">{mod.icon}</div>
+                <div>
+                  <h2 className="font-black text-base mb-1 tracking-tight">{mod.title}</h2>
+                  <p className="text-xs font-medium opacity-80 leading-relaxed">{mod.desc}</p>
+                </div>
               </button>
             ))}
           </div>
         ) : (
-          <div className="space-y-5 animate-slide-up">
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+          <div className="space-y-6 animate-slide-up">
+            <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  {activeMode.inputType === 'topic' ? 'Select or Type Topic' : 'Your Input'}
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                  {activeMode.inputType === 'topic' ? 'Select or Type Topic' : 'Input Question'}
                 </label>
                 {activeMode.inputType === 'topic' ? (
                   <div className="mt-2 text-gray-900">
@@ -161,63 +220,57 @@ export default function PhysicsHelperPage() {
                   </div>
                 ) : (
                   <textarea
-                    className="w-full mt-2 px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:border-blue-400 outline-none text-gray-900 min-h-[120px] resize-y"
+                    className="w-full mt-2 px-5 py-4 rounded-2xl border-2 border-gray-100 text-sm font-medium focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none text-gray-900 min-h-[140px] resize-y transition-all"
                     placeholder={activeMode.placeholder}
                     value={inputVal}
                     onChange={(e) => setInputVal(e.target.value)}
                   />
                 )}
                 
-                <div className="mt-2">
+                <div className="mt-3 flex items-center justify-between">
                   <button 
                     onClick={() => setInputVal(activeMode.example)}
-                    className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+                    className="text-[10px] font-black text-blue-600 bg-blue-50 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors flex items-center gap-1.5 active:scale-95"
                   >
-                    🎲 Try Example
+                    🎲 Try Example Topic
                   </button>
+                  {inputVal && (
+                    <button 
+                      onClick={() => setInputVal('')}
+                      className="text-[10px] font-bold text-gray-400 hover:text-red-500 transition-colors px-2"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
               </div>
 
               <button
                 onClick={handleRun}
                 disabled={!inputVal || loading}
-                className={`w-full py-3.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95 flex items-center justify-center gap-2
-                  ${(!inputVal || loading) ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 shadow-md hover:bg-gray-800'}
+                className={`w-full py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 flex items-center justify-center gap-3
+                  ${(!inputVal || loading) ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-gray-900 shadow-xl shadow-blue-900/10 hover:bg-blue-600'}
                 `}
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <>✨ Generate Magic</>
+                  <>✨ Launch Learning Mode</>
                 )}
               </button>
             </div>
 
             {loading && !result && (
-              <div className="text-center py-10 space-y-3">
-                <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
-                <p className="text-sm font-medium text-gray-600 animate-pulse">Simplifying physics concepts for you...</p>
+              <div className="text-center py-12 space-y-4">
+                <div className="w-12 h-12 border-4 border-gray-100 border-t-blue-600 rounded-full animate-spin mx-auto" />
+                <div>
+                  <p className="text-sm font-black text-gray-900">Simplifying your path to MBBS...</p>
+                  <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Building step-by-step logic</p>
+                </div>
               </div>
             )}
 
-            {result && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-slide-up">
-                <div className="bg-gray-900 px-4 py-2.5 flex justify-between items-center">
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">AI Coach Output</span>
-                  <button 
-                    onClick={copyToClipboard}
-                    className="text-xs font-bold bg-white text-gray-900 px-3 py-1 rounded-md hover:bg-gray-100 active:scale-95"
-                  >
-                    Copy
-                  </button>
-                </div>
-                <div className="p-4 sm:p-5 overflow-auto">
-                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800 leading-relaxed max-w-none">
-                    {result.replace(/\*/g, '')}
-                  </pre>
-                </div>
-              </div>
-            )}
+            {result && <StructuredResult text={result} copyToClipboard={copyToClipboard} />}
           </div>
         )}
       </div>
