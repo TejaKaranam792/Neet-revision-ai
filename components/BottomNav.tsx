@@ -8,6 +8,7 @@ const navItems = [
   { href: '/flashcards', label: 'Flashcards', icon: '📚' },
   { href: '/weak-cards', label: 'Weak Cards', icon: '🎯' },
   { href: '/quick-revision', label: 'Quick Mode', icon: '⚡' },
+  { href: '/physics-helper', label: 'Physics', icon: '🧲' },
 ];
 
 export default function BottomNav() {
